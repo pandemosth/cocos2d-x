@@ -289,6 +289,11 @@ Downloader::HeaderInfo Downloader::prepareHeader(const std::string &srcUrl, void
     curl_easy_setopt(header, CURLOPT_HEADER, 1);
     curl_easy_setopt(header, CURLOPT_NOBODY, 1);
     curl_easy_setopt(header, CURLOPT_NOSIGNAL, 1);
+    // PD
+    curl_easy_setopt(header, CURLOPT_FOLLOWLOCATION, true);
+    curl_easy_setopt(header, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(header, CURLOPT_SSL_VERIFYPEER, 0L);
+    
     if (curl_easy_perform(header) == CURLE_OK)
     {
         char *url;
@@ -413,6 +418,11 @@ void Downloader::downloadToBuffer(const std::string &srcUrl, const std::string &
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, LOW_SPEED_LIMIT);
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, LOW_SPEED_TIME);
     
+    // PD
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK)
     {
@@ -484,6 +494,11 @@ void Downloader::download(const std::string &srcUrl, const std::string &customId
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, LOW_SPEED_LIMIT);
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, LOW_SPEED_TIME);
+    
+    // PD
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK)
