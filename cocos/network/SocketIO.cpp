@@ -346,7 +346,7 @@ class SIOClientImpl :
 private:
     int _port, _heartbeat, _timeout;
     std::string _host, _sid, _uri;
-    bool _connected;
+    bool _connected, _ssl;
     SocketIOPacket::SocketIOVersion _version;
 
     WebSocket *_ws;
@@ -354,10 +354,10 @@ private:
     Map<std::string, SIOClient*> _clients;
 
 public:
-    SIOClientImpl(const std::string& host, int port);
+    SIOClientImpl(const std::string& host, int port, bool useSSL);
     virtual ~SIOClientImpl(void);
 
-    static SIOClientImpl* create(const std::string& host, int port);
+    static SIOClientImpl* create(const std::string& host, int port, bool useSSL);
 
     virtual void onOpen(WebSocket* ws);
     virtual void onMessage(WebSocket* ws, const WebSocket::Data& data);
@@ -389,9 +389,10 @@ public:
 //method implementations
 
 //begin SIOClientImpl methods
-SIOClientImpl::SIOClientImpl(const std::string& host, int port) :
+SIOClientImpl::SIOClientImpl(const std::string& host, int port, bool useSSL) :
     _port(port),
     _host(host),
+    _ssl(useSSL),
     _connected(false)
 {
     std::stringstream s;
@@ -414,7 +415,7 @@ void SIOClientImpl::handshake()
     CCLOGINFO("SIOClientImpl::handshake() called");
 
     std::stringstream pre;
-    pre << "http://" << _uri << "/socket.io/1/?EIO=2&transport=polling&b64=true";
+    pre << "https://" << _uri << "/socket.io/1/?EIO=2&transport=polling&b64=true";
 
     HttpRequest* request = new (std::nothrow) HttpRequest();
     request->setUrl(pre.str().c_str());
@@ -565,7 +566,7 @@ void SIOClientImpl::openSocket()
     switch (_version)
     {
         case SocketIOPacket::SocketIOVersion::V09x:
-            s << _uri << "/socket.io/1/websocket/" << _sid;
+            s << (_ssl ? "wss://" : "ws://") << _uri << "/socket.io/1/websocket/" << _sid;
             break;
         case SocketIOPacket::SocketIOVersion::V10x:
             s << _uri << "/socket.io/1/websocket/?EIO=2&transport=websocket&sid=" << _sid;
@@ -616,9 +617,9 @@ void SIOClientImpl::disconnect()
     SocketIO::getInstance()->removeSocket(_uri);
 }
 
-SIOClientImpl* SIOClientImpl::create(const std::string& host, int port)
+SIOClientImpl* SIOClientImpl::create(const std::string& host, int port, bool useSSL)
 {
-    SIOClientImpl *s = new (std::nothrow) SIOClientImpl(host, port);
+    SIOClientImpl *s = new (std::nothrow) SIOClientImpl(host, port, useSSL);
 
     if (s && s->init())
     {
@@ -1135,6 +1136,13 @@ SIOClient* SocketIO::connect(const std::string& uri, SocketIO::SIODelegate& dele
     std::string host = uri;
     int port = 0;
     size_t pos = 0;
+    bool useSSL = false;
+    
+    pos = host.find("https://");
+    if (pos == 0)
+    {
+        useSSL = true;
+    }
 
     pos = host.find("//");
     if (pos != std::string::npos)
@@ -1176,7 +1184,7 @@ SIOClient* SocketIO::connect(const std::string& uri, SocketIO::SIODelegate& dele
     if(socket == nullptr)
     {
         //create a new socket, new client, connect
-        socket = SIOClientImpl::create(host, port);
+        socket = SIOClientImpl::create(host, port, useSSL);
 
         c = new (std::nothrow) SIOClient(host, port, path, socket, delegate);
 
