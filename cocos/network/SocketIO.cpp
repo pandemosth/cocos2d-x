@@ -415,7 +415,7 @@ void SIOClientImpl::handshake()
     CCLOGINFO("SIOClientImpl::handshake() called");
 
     std::stringstream pre;
-    pre << "https://" << _uri << "/socket.io/1/?EIO=2&transport=polling&b64=true";
+    pre << (_ssl ? "https://" : "http://") << _uri << "/socket.io/1/?EIO=2&transport=polling&b64=true";
 
     HttpRequest* request = new (std::nothrow) HttpRequest();
     request->setUrl(pre.str().c_str());
