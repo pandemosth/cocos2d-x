@@ -987,6 +987,8 @@ void SIOClientImpl::onClose(WebSocket* ws)
             iter->second->socketClosed();
         }
     }
+    
+    SocketIO::getInstance()->removeSocket(_uri);
 
     this->release();
 }
