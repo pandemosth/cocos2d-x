@@ -34,6 +34,8 @@
 #include "platform/CCFileUtils.h"
 #include "ui/UIWebView.h"
 
+#include "UIWebViewExtension-ios.h"
+
 static std::string getFixedBaseUrl(const std::string& baseUrl)
 {
     std::string fixedBaseUrl;
@@ -133,6 +135,9 @@ static std::string getFixedBaseUrl(const std::string& baseUrl)
     if (!self.uiWebView) {
         self.uiWebView = [[[UIWebView alloc] init] autorelease];
         self.uiWebView.delegate = self;
+        
+        self.uiWebView.hackishlyHidesInputAccessoryView = YES;
+        self.uiWebView.scrollView.bounces = NO;
     }
     if (!self.uiWebView.superview) {
         auto view = cocos2d::Director::getInstance()->getOpenGLView();
