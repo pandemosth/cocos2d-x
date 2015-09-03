@@ -453,6 +453,7 @@ public:
 
     virtual void removeAllChildrenWithCleanup(bool cleanup) override;
     virtual void removeChild(Node* child, bool cleanup = true) override;
+    virtual void setGlobalZOrder(float globalZOrder) override;
 
     CC_DEPRECATED_ATTRIBUTE static Label* create(const std::string& text, const std::string& font, float fontSize,
         const Size& dimensions = Size::ZERO, TextHAlignment hAlignment = TextHAlignment::LEFT,
@@ -505,6 +506,7 @@ protected:
     bool multilineTextWrapByChar();
     bool multilineTextWrapByWord();
 
+    void updateLabelLetters();
     virtual void alignText();
     void computeAlignmentOffset();
     bool computeHorizontalKernings(const std::u16string& stringToRender);

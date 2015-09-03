@@ -144,6 +144,11 @@ public:
 
         _textureAtlas->updateQuad(&_quad, _atlasIndex);
     }
+
+    //LabelLetter doesn't need to draw directly.
+    void draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
+    {
+    }
 };
 
 Label* Label::create()
@@ -646,6 +651,55 @@ void Label::setLineBreakWithoutSpace(bool breakWithoutSpace)
     }
 }
 
+void Label::updateLabelLetters()
+{
+    if (!_letters.empty())
+    {
+        Rect uvRect;
+        LabelLetter* letterSprite;
+        int letterIndex;
+
+        for (auto it = _letters.begin(); it != _letters.end();)
+        {
+            letterIndex = it->first;
+            letterSprite = (LabelLetter*)it->second;
+
+            if (letterIndex >= _lengthOfString)
+            {
+                Node::removeChild(letterSprite, true);
+                it = _letters.erase(it);
+            }
+            else
+            {
+                auto& letterInfo = _lettersInfo[letterIndex];
+                auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf16Char];
+                uvRect.size.height = letterDef.height;
+                uvRect.size.width = letterDef.width;
+                uvRect.origin.x = letterDef.U;
+                uvRect.origin.y = letterDef.V;
+
+                letterSprite->setTexture(_fontAtlas->getTexture(letterDef.textureID));
+                if (letterDef.width <= 0.f || letterDef.height <= 0.f)
+                {
+                    letterSprite->setTextureAtlas(nullptr);
+                }
+                else
+                {
+                    letterSprite->setTextureRect(uvRect, false, uvRect.size);
+                    letterSprite->setTextureAtlas(_batchNodes.at(letterDef.textureID)->getTextureAtlas());
+                    letterSprite->setAtlasIndex(_lettersInfo[letterIndex].atlasIndex);
+                }
+
+                auto px = letterInfo.positionX + letterDef.width / 2 + _linesOffsetX[letterInfo.lineIndex];
+                auto py = letterInfo.positionY - letterDef.height / 2 + _letterOffsetY;
+                letterSprite->setPosition(px, py);
+
+                ++it;
+            }
+        }
+    }
+}
+
 void Label::alignText()
 {
     if (_fontAtlas == nullptr || _utf16Text.empty())
@@ -690,43 +744,9 @@ void Label::alignText()
     }
     computeAlignmentOffset();
 
-    if (!_letters.empty())
-    {
-        Rect uvRect;
-        Sprite* letterSprite;
-        int letterIndex;
-
-        for (auto it = _letters.begin(); it != _letters.end();)
-        {
-            letterIndex = it->first;
-            letterSprite = it->second;
-
-            if (letterIndex >= _lengthOfString)
-            {
-                Node::removeChild(letterSprite, true);
-                it = _letters.erase(it);
-            }
-            else
-            {
-                auto& letterInfo = _lettersInfo[letterIndex];
-                auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf16Char];
-                uvRect.size.height = letterDef.height;
-                uvRect.size.width = letterDef.width;
-                uvRect.origin.x = letterDef.U;
-                uvRect.origin.y = letterDef.V;
-
-                letterSprite->setBatchNode(_batchNodes.at(letterDef.textureID));
-                letterSprite->setTextureRect(uvRect, false, uvRect.size);
-                auto px = letterInfo.positionX + letterDef.width / 2 + _linesOffsetX[letterInfo.lineIndex];
-                auto py = letterInfo.positionY - letterDef.height / 2 + _letterOffsetY;
-                letterSprite->setPosition(px,py);
-
-                ++it;
-            }
-        }
-    }
-
     updateQuads();
+
+    updateLabelLetters();
 
     updateColor();
 }
@@ -963,6 +983,7 @@ void Label::createSpriteForSystemFont(const FontDefinition& fontDef)
     _textSprite = Sprite::createWithTexture(texture);
     //set camera mask using label's camera mask, because _textSprite may be null when setting camera mask to label
     _textSprite->setCameraMask(getCameraMask());
+    _textSprite->setGlobalZOrder(getGlobalZOrder());
     _textSprite->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
     this->setContentSize(_textSprite->getContentSize());
     texture->release();
@@ -1007,6 +1028,7 @@ void Label::createShadowSpriteForSystemFont(const FontDefinition& fontDef)
             _shadowNode->setBlendFunc(_blendFunc);
         }
         _shadowNode->setCameraMask(getCameraMask());
+        _shadowNode->setGlobalZOrder(getGlobalZOrder());
         _shadowNode->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
         _shadowNode->setPosition(_shadowOffset.width, _shadowOffset.height);
 
@@ -1372,7 +1394,7 @@ Sprite* Label::getLetter(int letterIndex)
         if (_systemFontDirty || _currentLabelType == LabelType::STRING_TEXTURE)
         {
             break;
-        }  
+        }
 
         auto contentDirty = _contentDirty;
         if (contentDirty)
@@ -1393,16 +1415,16 @@ Sprite* Label::getLetter(int letterIndex)
                 letter = _letters[letterIndex];
             }
 
-            auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf16Char];
-            auto textureID = letterDef.textureID;
-            Rect uvRect;
-            uvRect.size.height = letterDef.height;
-            uvRect.size.width = letterDef.width;
-            uvRect.origin.x = letterDef.U;
-            uvRect.origin.y = letterDef.V;
-
             if (letter == nullptr)
             {
+                auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf16Char];
+                auto textureID = letterDef.textureID;
+                Rect uvRect;
+                uvRect.size.height = letterDef.height;
+                uvRect.size.width = letterDef.width;
+                uvRect.origin.x = letterDef.U;
+                uvRect.origin.y = letterDef.V;
+
                 if (letterDef.width <= 0.f || letterDef.height <= 0.f)
                 {
                     letter = LabelLetter::create();
@@ -1420,19 +1442,6 @@ Sprite* Label::getLetter(int letterIndex)
                 
                 addChild(letter);
                 _letters[letterIndex] = letter;
-            }
-            else if (contentDirty)
-            {
-                if (letterDef.width <= 0.f || letterDef.height <= 0.f)
-                {
-                    letter->setTextureAtlas(nullptr);
-                }
-                else
-                {
-                    letter->setTexture(_fontAtlas->getTexture(textureID));
-                    letter->setTextureRect(uvRect, false, uvRect.size);
-                    letter->setTextureAtlas(_batchNodes.at(textureID)->getTextureAtlas());
-                }
             }
         }
     } while (false);
@@ -1715,6 +1724,19 @@ FontDefinition Label::_getFontDefinition() const
 #endif
 
     return systemFontDef;
+}
+
+void Label::setGlobalZOrder(float globalZOrder)
+{
+    Node::setGlobalZOrder(globalZOrder);
+    if (_textSprite)
+    {
+        _textSprite->setGlobalZOrder(globalZOrder);
+        if (_shadowNode)
+        {
+            _shadowNode->setGlobalZOrder(globalZOrder);
+        }
+    }
 }
 
 NS_CC_END
