@@ -118,7 +118,10 @@ int DownloaderImpl::performDownload(DownloadUnit* unit,
     curl_easy_setopt(_curlHandle, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(_curlHandle, CURLOPT_LOW_SPEED_LIMIT, LOW_SPEED_LIMIT);
     curl_easy_setopt(_curlHandle, CURLOPT_LOW_SPEED_TIME, LOW_SPEED_TIME);
-
+    
+    curl_easy_setopt(_curlHandle, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_easy_setopt(_curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+    
     _writerCallback = writerCallback;
     _progressCallback = progressCallback;
     _lastErrCode = curl_easy_perform(_curlHandle);
@@ -287,6 +290,8 @@ int DownloaderImpl::getHeader(const std::string& url, HeaderInfo* headerInfo)
     curl_easy_setopt(curlHandle, CURLOPT_HEADER, 1);
     curl_easy_setopt(curlHandle, CURLOPT_NOBODY, 1);
     curl_easy_setopt(curlHandle, CURLOPT_NOSIGNAL, 1);
+    curl_easy_setopt(curlHandle, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_easy_setopt(curlHandle, CURLOPT_FOLLOWLOCATION, 1);
     // in win32 platform, if not set the writeFunction, it will return CURLE_WRITE_ERROR
     curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, _fileWriteFuncForAdapter);
     if ((_lastErrCode=curl_easy_perform(curlHandle)) == CURLE_OK)
