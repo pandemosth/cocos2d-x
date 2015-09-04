@@ -595,6 +595,9 @@ void SIOClientImpl::connect()
 
 void SIOClientImpl::disconnect()
 {
+    
+    _connected = false;
+    
     if(_ws->getReadyState() == WebSocket::State::OPEN)
     {
         std::string s, endpoint;
@@ -611,8 +614,6 @@ void SIOClientImpl::disconnect()
     Director::getInstance()->getScheduler()->unscheduleAllForTarget(this);
 
     _ws->close();
-
-    _connected = false;
 
     SocketIO::getInstance()->removeSocket(_uri);
 }
@@ -989,7 +990,9 @@ void SIOClientImpl::onClose(WebSocket* ws)
         }
     }
     
-    SocketIO::getInstance()->removeSocket(_uri);
+    if(_connected) {
+        SocketIO::getInstance()->removeSocket(_uri);
+    }
 
     this->release();
 }
