@@ -437,12 +437,18 @@ private:
     
     void addCookiesForRequestHeader()
     {
-        if(_client->getCookieFilename().empty())
-        {
-            return;
-        }
+//        if(_client->getCookieFilename().empty())
+//        {
+//            CCLOG("addCookiesForRequestHeader: EMpty!");
+//            return;
+//        }
         
         _cookieFileName = FileUtils::getInstance()->fullPathForFilename(_client->getCookieFilename());
+        
+        if (_cookieFileName.empty())
+        {
+            _cookieFileName = FileUtils::getInstance()->getWritablePath() + "cookieFile.txt";
+        }
         
         std::string cookiesInfo = FileUtils::getInstance()->getStringFromFile(_cookieFileName);
         
