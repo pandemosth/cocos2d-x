@@ -392,6 +392,7 @@ void EditBoxImplIOS::setNativeInputFlag(EditBox::InputFlag inputFlag)
             break;
         case EditBox::InputFlag::SENSITIVE:
             _systemControl.textField.autocorrectionType = UITextAutocorrectionTypeNo;
+            _systemControl.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
             break;
         default:
             break;
