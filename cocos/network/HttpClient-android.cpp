@@ -493,7 +493,11 @@ private:
             {
                 elems.push_back(item);
             }
-            
+
+            // skip empty value cookies and any other malformed lines
+            if(elems.size() != 7)
+                continue;
+
             co.domain = elems[0];
             if (co.domain.at(0) == '.')
             {
