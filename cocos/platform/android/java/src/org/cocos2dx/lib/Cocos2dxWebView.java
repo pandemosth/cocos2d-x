@@ -6,6 +6,8 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -97,5 +99,23 @@ public class Cocos2dxWebView extends WebView {
         layoutParams.height = maxHeight;
         layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
         this.setLayoutParams(layoutParams);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+            this.requestFocus();
+        }
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            Cocos2dxActivity activity = (Cocos2dxActivity)Cocos2dxHelper.getActivity();
+            activity.getGLSurfaceView().requestFocus();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
