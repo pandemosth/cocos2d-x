@@ -84,7 +84,7 @@ protected:
     std::string _name;//event name
     std::vector<std::string> _args;//we will be using a vector of strings to store multiple data
     std::string _endpoint;//
-    std::string _endpointseperator;//socket.io 1.x requires a ',' between endpoint and payload
+    std::string _endpointseparator;//socket.io 1.x requires a ',' between endpoint and payload
     std::string _type;//message type
     std::string _separator;//for stringify the object
     std::vector<std::string> _types;//types of messages
@@ -101,7 +101,7 @@ private:
     std::vector<std::string> _typesMessage;
 };
 
-SocketIOPacket::SocketIOPacket() :_separator(":")
+SocketIOPacket::SocketIOPacket() :_separator(":"), _endpointseparator("")
 {
     _types.push_back("disconnect");
     _types.push_back("connect");
@@ -149,7 +149,7 @@ std::string SocketIOPacket::toString()const
 
     // Add the endpoint for the namespace to be used if not the default namespace "" or "/", and as long as it is not an ACK, heartbeat, or disconnect packet
     if (_endpoint != "/" && _endpoint != "" && _type != "ack" && _type != "heartbeat" && _type != "disconnect") {
-        encoded << _endpoint << _endpointseperator;
+        encoded << _endpoint << _endpointseparator;
     }
     encoded << this->_separator;
 
@@ -230,8 +230,8 @@ std::string SocketIOPacket::stringify()const
 
 SocketIOPacketV10x::SocketIOPacketV10x()
 {
-    _separator = ":";
-    _endpointseperator = ",";
+    _separator = "";
+    _endpointseparator = ",";
     _types.push_back("disconnected");
     _types.push_back("connected");
     _types.push_back("heartbeat");
@@ -346,7 +346,7 @@ class SIOClientImpl :
 private:
     int _port, _heartbeat, _timeout;
     std::string _host, _sid, _uri;
-    bool _connected, _ssl;
+    bool _connected;
     SocketIOPacket::SocketIOVersion _version;
 
     WebSocket *_ws;
@@ -354,10 +354,10 @@ private:
     Map<std::string, SIOClient*> _clients;
 
 public:
-    SIOClientImpl(const std::string& host, int port, bool useSSL);
+    SIOClientImpl(const std::string& host, int port);
     virtual ~SIOClientImpl(void);
 
-    static SIOClientImpl* create(const std::string& host, int port, bool useSSL);
+    static SIOClientImpl* create(const std::string& host, int port);
 
     virtual void onOpen(WebSocket* ws);
     virtual void onMessage(WebSocket* ws, const WebSocket::Data& data);
@@ -389,10 +389,9 @@ public:
 //method implementations
 
 //begin SIOClientImpl methods
-SIOClientImpl::SIOClientImpl(const std::string& host, int port, bool useSSL) :
+SIOClientImpl::SIOClientImpl(const std::string& host, int port) :
     _port(port),
     _host(host),
-    _ssl(useSSL),
     _connected(false)
 {
     std::stringstream s;
@@ -415,7 +414,7 @@ void SIOClientImpl::handshake()
     CCLOGINFO("SIOClientImpl::handshake() called");
 
     std::stringstream pre;
-    pre << (_ssl ? "https://" : "http://") << _uri << "/socket.io/1/?EIO=2&transport=polling&b64=true";
+    pre << "http://" << _uri << "/socket.io/1/?EIO=2&transport=polling&b64=true";
 
     HttpRequest* request = new (std::nothrow) HttpRequest();
     request->setUrl(pre.str().c_str());
@@ -566,7 +565,7 @@ void SIOClientImpl::openSocket()
     switch (_version)
     {
         case SocketIOPacket::SocketIOVersion::V09x:
-            s << (_ssl ? "wss://" : "ws://") << _uri << "/socket.io/1/websocket/" << _sid;
+            s << _uri << "/socket.io/1/websocket/" << _sid;
             break;
         case SocketIOPacket::SocketIOVersion::V10x:
             s << _uri << "/socket.io/1/websocket/?EIO=2&transport=websocket&sid=" << _sid;
@@ -595,9 +594,6 @@ void SIOClientImpl::connect()
 
 void SIOClientImpl::disconnect()
 {
-    
-    _connected = false;
-    
     if(_ws->getReadyState() == WebSocket::State::OPEN)
     {
         std::string s, endpoint;
@@ -615,12 +611,14 @@ void SIOClientImpl::disconnect()
 
     _ws->close();
 
+    _connected = false;
+
     SocketIO::getInstance()->removeSocket(_uri);
 }
 
-SIOClientImpl* SIOClientImpl::create(const std::string& host, int port, bool useSSL)
+SIOClientImpl* SIOClientImpl::create(const std::string& host, int port)
 {
-    SIOClientImpl *s = new (std::nothrow) SIOClientImpl(host, port, useSSL);
+    SIOClientImpl *s = new (std::nothrow) SIOClientImpl(host, port);
 
     if (s && s->init())
     {
@@ -989,10 +987,6 @@ void SIOClientImpl::onClose(WebSocket* ws)
             iter->second->socketClosed();
         }
     }
-    
-    if(_connected) {
-        SocketIO::getInstance()->removeSocket(_uri);
-    }
 
     this->release();
 }
@@ -1102,6 +1096,11 @@ void SIOClient::fireEvent(const std::string& eventName, const std::string& data)
 
     CCLOGINFO("SIOClient::fireEvent no native event with name %s found", eventName.c_str());
 }
+    
+void SIOClient::setTag(const char* tag)
+{
+    _tag = tag;
+}
 
 //begin SocketIO methods
 SocketIO *SocketIO::_inst = nullptr;
@@ -1139,13 +1138,6 @@ SIOClient* SocketIO::connect(const std::string& uri, SocketIO::SIODelegate& dele
     std::string host = uri;
     int port = 0;
     size_t pos = 0;
-    bool useSSL = false;
-    
-    pos = host.find("https://");
-    if (pos == 0)
-    {
-        useSSL = true;
-    }
 
     pos = host.find("//");
     if (pos != std::string::npos)
@@ -1187,7 +1179,7 @@ SIOClient* SocketIO::connect(const std::string& uri, SocketIO::SIODelegate& dele
     if(socket == nullptr)
     {
         //create a new socket, new client, connect
-        socket = SIOClientImpl::create(host, port, useSSL);
+        socket = SIOClientImpl::create(host, port);
 
         c = new (std::nothrow) SIOClient(host, port, path, socket, delegate);
 
@@ -1207,7 +1199,24 @@ SIOClient* SocketIO::connect(const std::string& uri, SocketIO::SIODelegate& dele
             socket->addClient(path, c);
 
             socket->connectToEndpoint(path);
-        }
+        }else{
+	    CCLOG("SocketIO: disconnect previous client");
+	    c->disconnect();
+	
+	    CCLOG("SocketIO: recreate a new socket, new client, connect");
+	    SIOClientImpl* newSocket = nullptr;
+	    SIOClient *newC = nullptr;
+	
+	    newSocket = SIOClientImpl::create(host, port);
+	
+    	    newC = new (std::nothrow) SIOClient(host, port, path, newSocket, delegate);
+	
+	    newSocket->addClient(path, newC);
+	
+	    newSocket->connect();
+	
+	    return newC;
+	}
     }
 
     return c;
