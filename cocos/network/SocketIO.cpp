@@ -986,9 +986,11 @@ void SIOClientImpl::onClose(WebSocket* ws)
         {
             iter->second->socketClosed();
         }
+        // discard this client
+        _connected = false;
+        Director::getInstance()->getScheduler()->unscheduleAllForTarget(this);
+        SocketIO::getInstance()->removeSocket(_uri);
     }
-    // remove dead SIOClientImpl instance from map (needed when unexpected disconnect)
-    SocketIO::getInstance()->removeSocket(_uri);
 
     this->release();
 }
