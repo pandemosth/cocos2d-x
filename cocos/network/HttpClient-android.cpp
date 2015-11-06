@@ -731,7 +731,7 @@ void HttpClient::processResponse(HttpResponse* response, char* responseMessage)
     // write data to HttpResponse
     response->setResponseCode(responseCode);
 
-    if (responseCode == -1)
+    if (responseCode <= 0)
     {
         response->setSucceed(false);
         response->setErrorBuffer(responseMessage);
