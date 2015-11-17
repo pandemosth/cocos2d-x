@@ -126,6 +126,7 @@ project.properties
 # Ignore prebuilt libraries folder
 /external/*
 !/external/config.json
+!/external/websockets
 /templates/lua-template-runtime/runtime
 /v*-deps-*.zip
 /v*-lua-runtime-*.zip
@@ -147,3 +148,15 @@ tests/cpp-tests/Resources/audio
 /*/*/*/prebuilt-mk/Android.mk
 /*/*/*/*/prebuilt-mk/Android.mk
 *.xcscmblueprint
+external/websockets/include/winrt_8.1
+external/websockets/include/wp_8.1
+external/websockets/include/mac
+external/websockets/include/win10
+external/websockets/include/linux
+external/websockets/include/win32
+external/websockets/prebuilt/linux
+external/websockets/prebuilt/win32
+external/websockets/prebuilt/wp_8.1
+external/websockets/prebuilt/mac
+external/websockets/prebuilt/win10
+external/websockets/prebuilt/winrt_8.1
