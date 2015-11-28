@@ -377,9 +377,9 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
     
     for(UIView* view in subviews)
     {
-        if([view isKindOfClass:NSClassFromString(@"CCCustomUITextField")] ||
-           [view isKindOfClass:NSClassFromString(@"UISingleLineTextField")] ||
-           [view isKindOfClass:NSClassFromString(@"UIMultilineTextField")])
+        if([view isKindOfClass:NSClassFromString(@"UITextView")] ||
+           [view isKindOfClass:NSClassFromString(@"CCUISingleLineTextField")] ||
+           [view isKindOfClass:NSClassFromString(@"CCUIMultilineTextField")])
         {
             if ([view isFirstResponder])
             {
