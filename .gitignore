@@ -41,7 +41,8 @@ BundleArtifacts
 .vs/
 
 # Ignore files build by ndk and eclipse
-libs/
+#libs/
+**/proj.android/libs
 bin/
 obj/
 gen/
@@ -161,3 +162,4 @@ external/websockets/prebuilt/wp_8.1
 external/websockets/prebuilt/mac
 external/websockets/prebuilt/win10
 external/websockets/prebuilt/winrt_8.1
+
