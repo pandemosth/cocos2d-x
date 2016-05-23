@@ -163,3 +163,8 @@ external/websockets/prebuilt/mac
 external/websockets/prebuilt/win10
 external/websockets/prebuilt/winrt_8.1
 
+cocos/platform/android/libcocos2dx/libs/facebook_lib/.settings
+cocos/platform/android/java/libs/facebook_lib/build/outputs
+cocos/platform/android/java/libs/facebook_lib/build/intermediates
+.copyignore
+cocos/platform/android/java/libs/gps/build/outputs
