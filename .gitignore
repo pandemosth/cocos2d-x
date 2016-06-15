@@ -34,15 +34,16 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 ipch/
 *.opensdf
+*.opendb
 SubmissionInfo
 Generated Files
 AppPackages
 BundleArtifacts
 .vs/
+*.VC.db
 
 # Ignore files build by ndk and eclipse
-#libs/
-**/proj.android/libs
+libs/
 bin/
 obj/
 gen/
@@ -128,7 +129,6 @@ project.properties
 # Ignore prebuilt libraries folder
 /external/*
 !/external/config.json
-!/external/websockets
 /templates/lua-template-runtime/runtime
 /v*-deps-*.zip
 /v*-lua-runtime-*.zip
@@ -150,21 +150,7 @@ tests/cpp-tests/Resources/audio
 /*/*/*/prebuilt-mk/Android.mk
 /*/*/*/*/prebuilt-mk/Android.mk
 *.xcscmblueprint
-external/websockets/include/winrt_8.1
-external/websockets/include/wp_8.1
-external/websockets/include/mac
-external/websockets/include/win10
-external/websockets/include/linux
-external/websockets/include/win32
-external/websockets/prebuilt/linux
-external/websockets/prebuilt/win32
-external/websockets/prebuilt/wp_8.1
-external/websockets/prebuilt/mac
-external/websockets/prebuilt/win10
-external/websockets/prebuilt/winrt_8.1
-
-cocos/platform/android/libcocos2dx/libs/facebook_lib/.settings
-cocos/platform/android/java/libs/facebook_lib/build/outputs
-cocos/platform/android/java/libs/facebook_lib/build/intermediates
-.copyignore
-cocos/platform/android/java/libs/gps/build/outputs
+tests/cpp-empty-test/proj.tizen/res/
+tests/cpp-tests/proj.tizen/res/
+tests/lua-empty-test/project/proj.tizen/res/
+tests/lua-tests/project/proj.tizen/res/

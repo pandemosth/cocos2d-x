@@ -25,6 +25,8 @@
 #include "network/CCDownloader-apple.h"
 
 #include "network/CCDownloader.h"
+#include "deprecated/CCString.h"
+#include <queue>
 
 ////////////////////////////////////////////////////////////////////////////////
 //  OC Classes Declaration
@@ -51,6 +53,7 @@
 {
     const cocos2d::network::DownloaderApple *_outer;
     cocos2d::network::DownloaderHints _hints;
+    std::queue<NSURLSessionTask*> _taskQueue;
 }
 @property (nonatomic, strong) NSURLSession *downloadSession;
 @property (nonatomic, strong) NSMutableDictionary *taskDict;    // ocTask: DownloadTaskWrapper
@@ -102,7 +105,7 @@ namespace cocos2d { namespace network {
     }
     IDownloadTask *DownloaderApple::createCoTask(std::shared_ptr<const DownloadTask>& task)
     {
-        DownloadTaskApple* coTask = new DownloadTaskApple();
+        DownloadTaskApple* coTask = new (std::nothrow) DownloadTaskApple();
         DeclareDownloaderImplVar;
         if (task->storagePath.length())
         {
@@ -225,14 +228,20 @@ namespace cocos2d { namespace network {
     }
     NSURLSessionDataTask *ocTask = [self.downloadSession dataTaskWithRequest:request];
     [self.taskDict setObject:[[DownloadTaskWrapper alloc] init:task] forKey:ocTask];
-    [ocTask resume];
+
+    if (_taskQueue.size() < _hints.countOfMaxProcessingTasks) {
+        [ocTask resume];
+        _taskQueue.push(nil);
+    } else {
+        _taskQueue.push(ocTask);
+    }
     return ocTask;
 };
 
 -(NSURLSessionDownloadTask *)createFileTask:(std::shared_ptr<const cocos2d::network::DownloadTask>&) task
 {
     const char *urlStr = task->requestURL.c_str();
-    DLLOG("DownloaderAppleImpl createDataTask: %s", urlStr);
+    DLLOG("DownloaderAppleImpl createFileTask: %s", urlStr);
     NSURL *url = [NSURL URLWithString:[NSString stringWithUTF8String:urlStr]];
     NSURLRequest *request = nil;
     if (_hints.timeoutInSeconds > 0)
@@ -255,7 +264,13 @@ namespace cocos2d { namespace network {
         ocTask = [self.downloadSession downloadTaskWithRequest:request];
     }
     [self.taskDict setObject:[[DownloadTaskWrapper alloc] init:task] forKey:ocTask];
-    [ocTask resume];
+
+    if (_taskQueue.size() < _hints.countOfMaxProcessingTasks) {
+        [ocTask resume];
+        _taskQueue.push(nil);
+    } else {
+        _taskQueue.push(ocTask);
+    }
     return ocTask;
 };
 
@@ -374,7 +389,8 @@ namespace cocos2d { namespace network {
     
     if(_outer)
     {
-        if(error) {
+        if(error)
+        {
             std::vector<unsigned char> buf; // just a placeholder
             _outer->onTaskFinish(*[wrapper get],
                              cocos2d::network::DownloadTask::ERROR_IMPL_INTERNAL,
@@ -382,27 +398,52 @@ namespace cocos2d { namespace network {
                              [error.localizedDescription cStringUsingEncoding:NSUTF8StringEncoding],
                              buf);
         }
-        else if(![wrapper get]->storagePath.length()) {
+        else if (![wrapper get]->storagePath.length())
+        {
             // call onTaskFinish for a data task
             // (for a file download task, callback is called in didFinishDownloadingToURL)
             std::string errorString;
-            
+
             const int64_t buflen = [wrapper totalBytesReceived];
             char buf[buflen];
-            
             [wrapper transferDataToBuffer:buf lengthOfBuffer:buflen];
-            
             std::vector<unsigned char> data(buf, buf + buflen);
             
             _outer->onTaskFinish(*[wrapper get],
                                  cocos2d::network::DownloadTask::ERROR_NO_ERROR,
-                                  0,
+                                 0,
                                  errorString,
                                  data);
+        }
+        else
+        {
+            NSInteger statusCode = ((NSHTTPURLResponse*)task.response).statusCode;
+            
+            // Check for error status code
+            if (statusCode >= 400)
+            {
+                std::vector<unsigned char> buf; // just a placeholder
+                const char *orignalURL = [task.originalRequest.URL.absoluteString cStringUsingEncoding:NSUTF8StringEncoding];
+                std::string errorMessage = cocos2d::StringUtils::format("Downloader: Failed to download %s with status code (%d)", orignalURL, (int)statusCode);
+                
+                _outer->onTaskFinish(*[wrapper get],
+                                     cocos2d::network::DownloadTask::ERROR_IMPL_INTERNAL,
+                                     0,
+                                     errorMessage,
+                                     buf);
+            }
         }
     }
     [self.taskDict removeObjectForKey:task];
     [wrapper release];
+
+    while (!_taskQueue.empty() && _taskQueue.front() == nil) {
+        _taskQueue.pop();
+    }
+    if (!_taskQueue.empty()) {
+        [_taskQueue.front() resume];
+        _taskQueue.pop();
+    }
 }
 
 #pragma mark - NSURLSessionDataDelegate methods
@@ -488,12 +529,21 @@ namespace cocos2d { namespace network {
         return;
     }
     
+    // On iOS 9 a response with status code 4xx(Client Error) or 5xx(Server Error)
+    // might end up calling this delegate method, saving the error message to the storage path
+    // and treating this download task as a successful one, so we need to check the status code here
+    NSInteger statusCode = ((NSHTTPURLResponse*)downloadTask.response).statusCode;
+    if (statusCode >= 400)
+    {
+        return;
+    }
+    
     DownloadTaskWrapper *wrapper = [self.taskDict objectForKey:downloadTask];
     const char * storagePath = [wrapper get]->storagePath.c_str();
     NSString *destPath = [NSString stringWithUTF8String:storagePath];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *destURL = nil;
-    
+
     do
     {
         if ([destPath hasPrefix:@"file://"])
@@ -503,9 +553,7 @@ namespace cocos2d { namespace network {
         
         if ('/' == [destPath characterAtIndex:0])
         {
-            // absolute path, need add prefix
-            NSString *prefix = @"file://";
-            destURL = [NSURL URLWithString:[prefix stringByAppendingString: destPath]];
+            destURL = [NSURL fileURLWithPath:destPath];
             break;
         }
         

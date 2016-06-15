@@ -238,29 +238,30 @@ Sequence* Sequence::createWithVariableList(FiniteTimeAction *action1, va_list ar
 
 Sequence* Sequence::create(const Vector<FiniteTimeAction*>& arrayOfActions)
 {
-    Sequence* ret = nullptr;
-    do 
+    Sequence* seq = new (std::nothrow) Sequence;
+
+    if (seq && seq->init(arrayOfActions))
+        seq->autorelease();
+    return seq;
+}
+
+bool Sequence::init(const Vector<FiniteTimeAction*>& arrayOfActions)
+{
+    auto count = arrayOfActions.size();
+    if (count == 0)
+        return true;
+
+    if (count == 1)
+        return initWithTwoActions(arrayOfActions.at(0), ExtraAction::create());
+
+    // else size > 1
+    auto prev = arrayOfActions.at(0);
+    for (int i = 1; i < count-1; ++i)
     {
-        auto count = arrayOfActions.size();
-        CC_BREAK_IF(count == 0);
+        prev = createWithTwoActions(prev, arrayOfActions.at(i));
+    }
 
-        auto prev = arrayOfActions.at(0);
-
-        if (count > 1)
-        {
-            for (int i = 1; i < count; ++i)
-            {
-                prev = createWithTwoActions(prev, arrayOfActions.at(i));
-            }
-        }
-        else
-        {
-            // If only one action is added to Sequence, make up a Sequence by adding a simplest finite time action.
-            prev = createWithTwoActions(prev, ExtraAction::create());
-        }
-        ret = static_cast<Sequence*>(prev);
-    }while (0);
-    return ret;
+    return initWithTwoActions(prev, arrayOfActions.at(count-1));
 }
 
 bool Sequence::initWithTwoActions(FiniteTimeAction *actionOne, FiniteTimeAction *actionTwo)
@@ -408,10 +409,11 @@ bool Repeat::initWithAction(FiniteTimeAction *action, unsigned int times)
 
         _actionInstant = dynamic_cast<ActionInstant*>(action) ? true : false;
         //an instant action needs to be executed one time less in the update method since it uses startWithTarget to execute the action
-        if (_actionInstant) 
-        {
-            _times -=1;
-        }
+        // minggo: instant action doesn't execute action in Repeat::startWithTarget(), so comment it.
+//        if (_actionInstant) 
+//        {
+//            _times -=1;
+//        }
         _total = 0;
 
         return true;
@@ -454,7 +456,7 @@ void Repeat::update(float dt)
 {
     if (dt >= _nextDt)
     {
-        while (dt > _nextDt && _total < _times)
+        while (dt >= _nextDt && _total < _times)
         {
             if (!(sendUpdateEventToScript(1.0f, _innerAction)))
                 _innerAction->update(1.0f);
@@ -466,8 +468,11 @@ void Repeat::update(float dt)
         }
 
         // fix for issue #1288, incorrect end value of repeat
-        if(dt >= 1.0f && _total < _times) 
+        if(fabs(dt - 1.0f) < FLT_EPSILON && _total < _times)
         {
+            if (!(sendUpdateEventToScript(1.0f, _innerAction)))
+                _innerAction->update(1.0f);
+            
             _total++;
         }
 
@@ -476,8 +481,9 @@ void Repeat::update(float dt)
         {
             if (_total == _times)
             {
-                if (!(sendUpdateEventToScript(1, _innerAction)))
-                    _innerAction->update(1);
+                // minggo: inner action update is invoked above, don't have to invoke it here
+//                if (!(sendUpdateEventToScript(1, _innerAction)))
+//                    _innerAction->update(1);
                 _innerAction->stop();
             }
             else
@@ -633,27 +639,10 @@ Spawn* Spawn::createWithVariableList(FiniteTimeAction *action1, va_list args)
 
 Spawn* Spawn::create(const Vector<FiniteTimeAction*>& arrayOfActions)
 {
-    Spawn* ret = nullptr;
-    do 
-    {
-        auto count = arrayOfActions.size();
-        CC_BREAK_IF(count == 0);
-        auto prev = arrayOfActions.at(0);
-        if (count > 1)
-        {
-            for (int i = 1; i < arrayOfActions.size(); ++i)
-            {
-                prev = createWithTwoActions(prev, arrayOfActions.at(i));
-            }
-        }
-        else
-        {
-            // If only one action is added to Spawn, make up a Spawn by adding a simplest finite time action.
-            prev = createWithTwoActions(prev, ExtraAction::create());
-        }
-        ret = static_cast<Spawn*>(prev);
-    }while (0);
+    Spawn* ret = new (std::nothrow) Spawn;
 
+    if (ret && ret->init(arrayOfActions))
+        ret->autorelease();
     return ret;
 }
 
@@ -664,6 +653,26 @@ Spawn* Spawn::createWithTwoActions(FiniteTimeAction *action1, FiniteTimeAction *
     spawn->autorelease();
 
     return spawn;
+}
+
+bool Spawn::init(const Vector<FiniteTimeAction*>& arrayOfActions)
+{
+    auto count = arrayOfActions.size();
+
+    if (count == 0)
+        return true;
+
+    if (count == 1)
+        return initWithTwoActions(arrayOfActions.at(0), ExtraAction::create());
+
+    // else count > 1
+    auto prev = arrayOfActions.at(0);
+    for (int i = 1; i < count-1; ++i)
+    {
+        prev = createWithTwoActions(prev, arrayOfActions.at(i));
+    }
+
+    return initWithTwoActions(prev, arrayOfActions.at(count-1));
 }
 
 bool Spawn::initWithTwoActions(FiniteTimeAction *action1, FiniteTimeAction *action2)
@@ -2530,11 +2539,6 @@ void TargetedAction::update(float time)
 {
     if (!(sendUpdateEventToScript(time, _action)))
         _action->update(time);
-}
-
-bool TargetedAction::isDone(void) const
-{
-    return _action->isDone();
 }
 
 void TargetedAction::setForcedTarget(Node* forcedTarget)

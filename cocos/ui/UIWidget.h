@@ -775,7 +775,7 @@ public:
      * Return a current focused widget in your UI scene.
      * No matter what widget object you call this method on , it will return you the exact one focused widget.
      */
-    Widget* getCurrentFocusedWidget()const;
+    static Widget* getCurrentFocusedWidget();
 
     /*
      *  Call this method with parameter true to enable the Android Dpad focus navigation feature
@@ -969,14 +969,14 @@ protected:
     bool _flippedX;
     bool _flippedY;
 
-    //use map to enble switch back and forth for user layout parameters
+    //use map to enable switch back and forth for user layout parameters
     Map<int,LayoutParameter*> _layoutParameterDictionary;
     LayoutParameter::Type _layoutParameterType;
 
     bool _focused;
     bool _focusEnabled;
     /**
-     * store the only one focued widget
+     * store the only one focused widget
      */
     static Widget *_focusedWidget;  //both layout & widget will be stored in this variable
 
