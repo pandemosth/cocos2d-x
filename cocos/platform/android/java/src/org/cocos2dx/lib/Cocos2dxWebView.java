@@ -59,6 +59,7 @@ public class Cocos2dxWebView extends WebView {
 
         this.getSettings().setSupportZoom(false);
 
+        this.getSettings().setDomStorageEnabled(true);
         this.getSettings().setJavaScriptEnabled(true);
         this.getSettings().setAllowUniversalAccessFromFileURLs(true);
 

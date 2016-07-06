@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Cocos2d-x 3.11.1 Release Notes](#cocos2d-x-3111-release-notes)
+- [Cocos2d-x 3.12 Release Notes](#cocos2d-x-312-release-notes)
 - [Misc Information](#misc-information)
 - [Requirements](#requirements)
   - [Runtime Requirements](#runtime-requirements)
@@ -14,15 +14,19 @@
     - [Windows](#windows)
     - [Linux](#linux)
   - [How to start a new game](#how-to-start-a-new-game)
-- [v3.11.1](#v3111)
-  - [Highlights features](#highlights-features)
-  - [The main features in detail of Cocos2d-x v3.11.1](#the-main-features-in-detail-of-cocos2d-x-v3111)
-    - [support IPv6-only network](#support-ipv6-only-network)
+- [v3.12](#v312)
+  - [Highlights](#highlights)
+  - [The main features in detail of Cocos2d-x v3.12](#the-main-features-in-detail-of-cocos2d-x-v312)
+    - [VR support](#vr-support)
+    - [Tizen support](#tizen-support)
+    - [improve Android performance](#improve-android-performance)
+    - [improve web engine performance in WebGL mode](#improve-web-engine-performance-in-webgl-mode)
+    - [Use clang on Android](#use-clang-on-android)
   - [Other changes](#other-changes)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Cocos2d-x 3.11.1 Release Notes #
+# Cocos2d-x 3.12 Release Notes #
 
 # Misc Information
 
@@ -32,7 +36,7 @@
 
 ## Runtime Requirements
 
-* Android 2.3 or newer
+* Android 2.3.3 or newer
 * iOS 5.0 or newer
 * OS X 10.7 or newer
 * Windows 7 or newer
@@ -146,17 +150,44 @@ Use the __cocos__ console app to create a new game:
 cocos new -l cpp|js|lua MyNewGame
 ```
 
-# v3.11.1
+# v3.12
 
-## Highlights features
+## Highlights
 
-* support IPv6-only network
+* add VR support in experimental
+* add Tizen support
+* improve Android performance issue
+* improve web engine performance in WebGL mode
+* support Android obb extension
+* use clang instead of gcc on Android
+
+## The main features in detail of Cocos2d-x v3.12
+
+### VR support
+VR Support is now available! Currently there is support for __Google Cardboard__, __Oculus Rift__, __Samsung Gear__ and __Deepoon E2__. Also provided is a *generic* __VR__ renderer to help with testing. It should not be used to trust deploying a production __VR__ game. In usual Cocos2d-x fashion it is very easy to get started with an easy to understand API. Read our chapter in the [Programmers Guide](http://cocos2d-x.org/docs/static-pages/programmers-guide.html) for more information.
 
 
-## The main features in detail of Cocos2d-x v3.11.1
+### Tizen support
+You can now develop for the __Tizen__ mobile platform. The latest __2.4__ SDK is supported. Tizen development uses it's own uniqie IDE as well as a simulator for testing applications. For setup instructions please read our [documentation](http://cocos2d-x.org/docs/installation/Tizen/).
 
-### support IPv6-only network
-[Apple required to support IPv6-only Networks](https://developer.apple.com/news/?id=05042016a) since June 1, 2016. And this version supports IPv6-only network.
+### improve Android performance
 
+Thank you to our users for helping diagnose performance issues on some Android devices. It is because cocos2d-x creates a big map buffer by default and fills the map buffer with actual data, which is less than the map buffer size. On some Android devices, it will transfer as much data as the map buffer size which causes performance issue.
+
+More detail information and discussion can refer to [the issue](https://github.com/cocos2d/cocos2d-x/issues/15652).
+
+### improve web engine performance in WebGL mode
+
+Web engine performance in WebGL mode is obviously improved in this version. The rendering performance, cpu usage and memory usage are optimized.
+
+![rendering peformance](https://raw.githubusercontent.com/minggo/Pictures/master/web-performance-improve/adverage-time-per-frame.png)
+
+![cpu-usage](https://raw.githubusercontent.com/minggo/Pictures/master/web-performance-improve/cpu-usage.png)
+
+![memory-usage](https://raw.githubusercontent.com/minggo/Pictures/master/web-performance-improve/memory-usage.png)
+
+### Use clang on Android
+[Google deprecated gcc starting in NDK r11](https://developer.android.com/ndk/downloads/revision_history.html), cocos2d-x now uses clang. We suggest using the latest NDK version, if possible. 
+ 
 ## Other changes
-You can also take a look at the [full changelog](https://github.com/cocos2d/cocos2d-x/blob/v3/CHANGELOG).
+View our [full changelog](https://github.com/cocos2d/cocos2d-x/blob/v3/CHANGELOG).
