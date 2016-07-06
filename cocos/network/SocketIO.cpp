@@ -354,7 +354,7 @@ private:
     Map<std::string, SIOClient*> _clients;
 
 public:
-    SIOClientImpl(const std::string& host, int port);
+    SIOClientImpl(const std::string& host, int port, bool useSSL);
     virtual ~SIOClientImpl();
 
     static SIOClientImpl* create(const std::string& host, int port, bool secure);
