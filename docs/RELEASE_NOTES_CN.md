@@ -23,13 +23,13 @@
 * 提升引擎在Android平台的渲染效率
 * 提升Cocos2d-html5 WebGL模式的性能
 * 支持Android的OBB扩展格式
-* Android平台使用clang编译器
+* Android平台使用clang编译器，使用NDK r11+
 
 ## 主要特性的详细介绍
 
 ### VR支持
 
-该版本添加了VR支持，不过还处于测试阶段。目前支持的设备有__Google Cardboard__，__Oculus Rift__，__Samsung Gear__和__Deepoon E2__。关于如何使用、测试VR功能，请参考[Programming Guide](http://cocos2d-x.org/docs/static-pages/programmers-guide.html)。
+该版本添加了VR支持，不过还处于测试阶段。目前支持的设备有__Google Cardboard__，__Oculus Rift__，__Samsung Gear__和__Deepoon E2__。关于如何使用、测试VR功能，请参考[Programming Guide](http://cocos2d-x.org/docs/programmers-guide/vr/index.html)。
 
 ### Tizen支持
 
@@ -70,7 +70,9 @@ glBufferData(GL_ARRAY_BUFFER, 100, xxx , GL_DYNAMIC_DRAW);
 
 ### Android使用clang编译器
 
-[从NDK r11开始Google弃用了gcc](https://developer.android.com/ndk/downloads/revision_history.html)，所以cocos2d-x也切换到clang编译器。如果可能的话，一般都建议使用最新版本的NDK。
+[从NDK r11开始Google弃用了gcc](https://developer.android.com/ndk/downloads/revision_history.html)，所以cocos2d-x也切换到clang编译器。
+
+建议使用NDK r11c。在测试过程中发现，如果使用NDK r10c + clang的话，`Node::enumerateChildren()`会崩溃。
 
 ## 其他改动
 更完整的改动列表可以阅读[full changelog](https://github.com/cocos2d/cocos2d-x/blob/v3/CHANGELOG)。
