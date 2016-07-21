@@ -29,4 +29,10 @@ dependencies {
     compile project(':gps')
     compile project(':facebook_lib')
     compile fileTree(dir: '../java/libs', include: ['*.jar'])
+
+    compile ('io.socket:socket.io-client:0.7.0') {
+        // excluding org.json which is provided by Android
+        exclude group: 'org.json', module: 'json'
+    }
+
 }
