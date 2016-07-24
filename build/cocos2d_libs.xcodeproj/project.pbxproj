@@ -717,9 +717,7 @@
 		15AE1BBA19AADFF000C27E9E /* HttpClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AAF5363180E3374000584C8 /* HttpClient.h */; };
 		15AE1BBB19AADFF000C27E9E /* HttpRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AAF5364180E3374000584C8 /* HttpRequest.h */; };
 		15AE1BBC19AADFF000C27E9E /* HttpResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AAF5365180E3374000584C8 /* HttpResponse.h */; };
-		15AE1BBD19AADFF000C27E9E /* SocketIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AAF5366180E3374000584C8 /* SocketIO.cpp */; };
 		15AE1BBE19AADFF000C27E9E /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AAF5367180E3374000584C8 /* SocketIO.h */; };
-		15AE1BBF19AADFF000C27E9E /* WebSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AAF5368180E3374000584C8 /* WebSocket.cpp */; };
 		15AE1BC019AADFF000C27E9E /* WebSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AAF5369180E3374000584C8 /* WebSocket.h */; };
 		15AE1BC119AADFFB00C27E9E /* cocos-ext.h in Headers */ = {isa = PBXBuildFile; fileRef = 46A167D21807AF4D005B8026 /* cocos-ext.h */; };
 		15AE1BC219AADFFB00C27E9E /* ExtensionMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 46A168321807AF4E005B8026 /* ExtensionMacros.h */; };
@@ -795,7 +793,6 @@
 		15AE1C1619AAE2C700C27E9E /* CCPhysicsDebugNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AD71EED180E27CF00808F54 /* CCPhysicsDebugNode.h */; };
 		15AE1C1719AAE2C700C27E9E /* CCPhysicsSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AD71EEE180E27CF00808F54 /* CCPhysicsSprite.cpp */; };
 		15AE1C1819AAE2C700C27E9E /* CCPhysicsSprite.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AD71EEF180E27CF00808F54 /* CCPhysicsSprite.h */; };
-		15AE1C1919AAE30900C27E9E /* libwebsockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1AAF5387180E35AC000584C8 /* libwebsockets.a */; };
 		15AE1C1A19AAE3C800C27E9E /* libwebsockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1AAF5384180E35A3000584C8 /* libwebsockets.a */; };
 		15B3707819EE414C00ABE682 /* AssetsManagerEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15B3706E19EE414C00ABE682 /* AssetsManagerEx.cpp */; };
 		15B3707919EE414C00ABE682 /* AssetsManagerEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15B3706E19EE414C00ABE682 /* AssetsManagerEx.cpp */; };
@@ -7757,7 +7754,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				15AE1C1919AAE30900C27E9E /* libwebsockets.a in Frameworks */,
 				292F1A5E1A5151CE00E479F8 /* libssl.a in Frameworks */,
 				A07A4CAF1783777C0073F6A7 /* Foundation.framework in Frameworks */,
 				1A570364180BD1120088DEC7 /* libpng.a in Frameworks */,
@@ -16654,7 +16650,6 @@
 				15AE182919AAD2F700C27E9E /* CCMeshSkin.cpp in Sources */,
 				3EACC9A119F5014D00EB3C5E /* CCCamera.cpp in Sources */,
 				B665E3E71AA80A6600DDB1C5 /* CCPUSineForceAffectorTranslator.cpp in Sources */,
-				15AE1BBD19AADFF000C27E9E /* SocketIO.cpp in Sources */,
 				B6CAB1FA1AF9AA1A00B9B856 /* btDbvtBroadphase.cpp in Sources */,
 				15AE1A4319AAD3D500C27E9E /* b2DynamicTree.cpp in Sources */,
 				15AE1A3A19AAD3D500C27E9E /* b2BroadPhase.cpp in Sources */,
@@ -17035,7 +17030,6 @@
 				B6CAB4A61AF9AA1A00B9B856 /* SequentialThreadSupport.cpp in Sources */,
 				B6CAB25E1AF9AA1A00B9B856 /* btInternalEdgeUtility.cpp in Sources */,
 				B665E3631AA80A6500DDB1C5 /* CCPUOnTimeObserver.cpp in Sources */,
-				15AE1BBF19AADFF000C27E9E /* WebSocket.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
