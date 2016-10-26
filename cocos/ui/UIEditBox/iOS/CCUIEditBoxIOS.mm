@@ -69,6 +69,7 @@
 - (void)dealloc
 {
     // custom setter cleanup
+    [self.textInput removeFromSuperview];
     self.textInput = nil;
     
     [super dealloc];
@@ -84,14 +85,14 @@
     
     // common init
     textInput.backgroundColor = [UIColor clearColor];
-    textInput.hidden = true;
+    //textInput.hidden = true;
     textInput.returnKeyType = UIReturnKeyDefault;
     [textInput ccui_setDelegate:self];
     
     // Migrate properties
     textInput.ccui_textColor = _textInput.ccui_textColor ?: [UIColor whiteColor];
-    textInput.ccui_text = _textInput.ccui_text ?: @"";
-    textInput.ccui_placeholder = _textInput.ccui_placeholder ?: @"";
+    //textInput.ccui_text = _textInput.ccui_text ?: @"";
+    //textInput.ccui_placeholder = _textInput.ccui_placeholder ?: @"";
     textInput.ccui_font = _textInput.ccui_font ?: [UIFont systemFontOfSize:self.frameRect.size.height*2/3];
     
     [_textInput resignFirstResponder];
@@ -99,6 +100,11 @@
     [_textInput release];
     
     _textInput = [textInput retain];
+    
+    //_textInput = textInput;
+//    auto view = cocos2d::Director::getInstance()->getOpenGLView();
+//    CCEAGLView *eaglview = (CCEAGLView *)view->getEAGLView();
+//    [eaglview addSubview:_textInput];
     
     [self setInputFlag:self.dataInputMode];
     [self setReturnType:self.keyboardReturnType];
@@ -280,10 +286,16 @@
 
 - (void)updateFrame:(CGRect)rect
 {
+    if(!self.textInput.superview) {
+        auto view = cocos2d::Director::getInstance()->getOpenGLView();
+        CCEAGLView *eaglview = (CCEAGLView *)view->getEAGLView();
+        [eaglview addSubview:_textInput];
+    }
+    
     CGRect frame = self.textInput.frame;
     frame.origin = rect.origin;
     frame.size = rect.size;
-    
+    self.frameRect = frame;
     self.textInput.frame = frame;
 }
 
@@ -292,14 +304,14 @@
     auto view = cocos2d::Director::getInstance()->getOpenGLView();
     CCEAGLView *eaglview = (CCEAGLView *)view->getEAGLView();
     
-    [eaglview addSubview:self.textInput];
+    //[eaglview addSubview:self.textInput];
     [self.textInput becomeFirstResponder];
 }
 
 - (void)closeKeyboard
 {
     [self.textInput resignFirstResponder];
-    [self.textInput removeFromSuperview];
+    //[self.textInput removeFromSuperview];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)sender
@@ -372,7 +384,27 @@
 
 - (void)textViewDidChange:(UITextView *)textView
 {
-    int maxLength = getEditBoxImplIOS()->getMaxLength();
+    int maxLength = getEditBoxImplIOS()->getMaxLength();    
+
+    CGFloat fixedWidth = textView.frame.size.width;
+    CGFloat currentHeight = textView.frame.size.height;
+    CGSize newSize = [textView sizeThatFits:CGSizeMake(fixedWidth, MAXFLOAT)];
+    
+    if(newSize.height != currentHeight) {
+        
+        CGRect newFrame = textView.frame;
+        newFrame.size = CGSizeMake(fixedWidth, newSize.height);
+        
+        CGFloat yPos = self.frameRect.origin.y + self.frameRect.size.height - newFrame.size.height;
+        newFrame.origin = CGPointMake(textView.frame.origin.x, yPos);
+        textView.frame = newFrame;
+        
+        // update editbox size
+        auto glview = cocos2d::Director::getInstance()->getOpenGLView();
+        CGFloat scaleFactor = glview->getScaleX() / glview->getContentScaleFactor();
+        getEditBoxImplIOS()->updateSize(cocos2d::Size(fixedWidth / scaleFactor, newSize.height / scaleFactor));
+    }
+    
     if (textView.markedTextRange == nil) {
         if (textView.text.length > maxLength) {
             textView.text = [textView.text substringToIndex:maxLength];

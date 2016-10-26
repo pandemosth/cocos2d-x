@@ -41,7 +41,13 @@ CGFloat const UI_PLACEHOLDER_TEXT_CHANGED_ANIMATION_DURATION = 0.25;
 - (instancetype)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
+    
     if (self) {
+        
+        self.textContainer.lineFragmentPadding = 0;
+        self.textContainerInset = UIEdgeInsetsZero;
+        self.scrollEnabled = NO;
+        
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(textChanged:)
@@ -69,7 +75,8 @@ CGFloat const UI_PLACEHOLDER_TEXT_CHANGED_ANIMATION_DURATION = 0.25;
 
 - (void)setPlaceholder:(NSString *)placeholder
 {
-    self.placeHolderLabel.text = placeholder;
+    //self.placeHolderLabel.font = self.font;
+    self.placeHolderLabel.text = @"placeholder";
     [self.placeHolderLabel sizeToFit];
 }
 
@@ -83,7 +90,7 @@ CGFloat const UI_PLACEHOLDER_TEXT_CHANGED_ANIMATION_DURATION = 0.25;
 {
     if (_placeHolderLabel == nil) {
         
-        _placeHolderLabel = [[UILabel alloc] initWithFrame:CGRectMake(8,8,self.bounds.size.width - 16,0)];
+        _placeHolderLabel = [[UILabel alloc] initWithFrame:self.bounds];
         _placeHolderLabel.lineBreakMode = NSLineBreakByWordWrapping;
         _placeHolderLabel.numberOfLines = 0;
         _placeHolderLabel.font = self.font;

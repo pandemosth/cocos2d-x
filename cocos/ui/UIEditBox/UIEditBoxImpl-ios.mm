@@ -55,7 +55,7 @@ EditBoxImplIOS::EditBoxImplIOS(EditBox* pEditText)
 : EditBoxImplCommon(pEditText)
 , _systemControl(nullptr)
 {
-    
+    _editBox = pEditText;
 }
 
 EditBoxImplIOS::~EditBoxImplIOS()
@@ -64,6 +64,85 @@ EditBoxImplIOS::~EditBoxImplIOS()
     _systemControl = nil;
 }
     
+bool EditBoxImplIOS::initWithSize(const Size& size)
+{
+    do
+    {
+        
+        Rect rect = Rect(0, 0, size.width, size.height);
+        
+        this->createNativeControl(rect);
+        
+        setContentSize(size);
+        
+        return true;
+    }while (0);
+    
+    return false;
+}
+    
+void EditBoxImplIOS::onEnter(void)
+{
+    const char* pText = getText();
+    if (pText) {
+        this->setNativeText(pText);
+    }
+}
+    
+void EditBoxImplIOS::openKeyboard()
+{
+    this->nativeOpenKeyboard();
+}
+
+void EditBoxImplIOS::closeKeyboard()
+{
+    this->nativeCloseKeyboard();
+}
+
+void EditBoxImplIOS::onEndEditing(const std::string& text)
+{
+    //CCLOG("[Edit text] onEndEditing");
+}
+    
+void EditBoxImplIOS::refreshInactiveText() {
+    
+}
+    
+void EditBoxImplIOS::setPlaceHolder(const char* pText)
+{
+    if (pText != NULL)
+    {
+        this->setNativePlaceHolder(pText);
+    }
+}
+
+void EditBoxImplIOS::setContentSize(const Size& size)
+{
+    //CCLOG("[Edit text] content size = (%f, %f)", size.width, size.height);
+}
+
+
+void EditBoxImplIOS::setFont(const char* pFontName, int fontSize)
+{
+    this->setNativeFont(pFontName, fontSize * _editBox->getNodeToWorldAffineTransform().a);
+}
+
+void EditBoxImplIOS::setFontColor(const Color4B& color)
+{
+this->setNativeFontColor(color);
+}
+
+void EditBoxImplIOS::setPlaceholderFont(const char* pFontName, int fontSize)
+{
+    this->setNativePlaceholderFont(pFontName, fontSize * _editBox->getNodeToWorldAffineTransform().a);
+}
+
+void EditBoxImplIOS::setPlaceholderFontColor(const Color4B &color)
+{
+    this->setNativePlaceholderFontColor(color);
+}
+    
+
 void EditBoxImplIOS::createNativeControl(const Rect& frame)
 {
     auto glview = cocos2d::Director::getInstance()->getOpenGLView();
@@ -80,7 +159,6 @@ void EditBoxImplIOS::createNativeControl(const Rect& frame)
                                                                              rect.size.width,
                                                                              rect.size.height)
                                                           editBox:this];
-
 }
 
 bool EditBoxImplIOS::isEditing()
@@ -127,7 +205,7 @@ void EditBoxImplIOS::setNativeInputMode(EditBox::InputMode inputMode)
     [_systemControl setInputMode:inputMode];
 
     auto oldPos = _editBox->getPosition();
-    _editBox->setPosition(oldPos + Vec2(10,10));
+    //_editBox->setPosition(oldPos + Vec2(10,10));
     _editBox->setPosition(oldPos);
 }
 
@@ -146,7 +224,11 @@ const char* EditBoxImplIOS::getText(void)
 {
     return [removeSiriString(_systemControl.text) UTF8String];
 }
-
+    
+void EditBoxImplIOS::editBoxEditingChanged(const std::string& text)
+{
+    EditBoxImplCommon::editBoxEditingChanged(text);
+}
 
 void EditBoxImplIOS::setNativeReturnType(EditBox::KeyboardReturnType returnType)
 {
@@ -178,11 +260,17 @@ void EditBoxImplIOS::updateNativeFrame(const Rect& rect)
 
     float factor = eaglview.contentScaleFactor;
     
-    [_systemControl updateFrame:CGRectMake(rect.origin.x / factor,
-                                           rect.origin.y / factor,
-                                           rect.size.width / factor,
-                                           rect.size.height / factor)];
+    [_systemControl updateFrame:CGRectMake((rect.origin.x + 5) / factor,
+                                           (rect.origin.y) / factor,
+                                           (rect.size.width) / factor,
+                                           (rect.size.height) / factor)];
 
+}
+    
+void EditBoxImplIOS::updateSize(const Size& size)
+{
+    //CCLOG("[Edit text] update size = (%f, %f)", size.width, size.height);
+    _editBox->setContentSize(size);
 }
 
 const char* EditBoxImplIOS::getNativeDefaultFontName()
@@ -193,7 +281,7 @@ const char* EditBoxImplIOS::getNativeDefaultFontName()
 
 void EditBoxImplIOS::nativeOpenKeyboard()
 {
-    [_systemControl setVisible:YES];
+//    [_systemControl setVisible:YES];
     [_systemControl openKeyboard];
 }
 

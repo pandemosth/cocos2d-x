@@ -54,6 +54,25 @@ public:
      */
     virtual ~EditBoxImplIOS();
     
+    EditBox* _editBox;
+    
+    virtual bool initWithSize(const Size& size) override;
+    virtual void onEnter(void) override;
+    virtual void openKeyboard() override;
+    virtual void closeKeyboard() override;
+    
+    virtual void refreshInactiveText() override;
+    virtual void onEndEditing(const std::string& text) override;
+    virtual void editBoxEditingChanged(const std::string& text);
+    
+    virtual void setPlaceHolder(const char* pText) override;
+    virtual void setContentSize(const Size& size) override;
+    
+    virtual void setFont(const char* pFontName, int fontSize) override;
+    virtual void setFontColor(const Color4B& color) override;
+    virtual void setPlaceholderFont(const char* pFontName, int fontSize) override;
+    virtual void setPlaceholderFontColor(const Color4B& color) override;
+    
     virtual bool isEditing() override;
     virtual void createNativeControl(const Rect& frame) override;
     virtual void setNativeFont(const char* pFontName, int fontSize) override;
@@ -70,6 +89,8 @@ public:
     virtual const char* getNativeDefaultFontName() override;
     virtual void nativeOpenKeyboard() override;
     virtual void nativeCloseKeyboard() override;
+    
+    virtual void updateSize(const Size& size);
     
     //need to remove siri text
     virtual const char* getText(void)override;
