@@ -58,9 +58,9 @@ public class Cocos2dxEditBoxHelper {
         editBoxEditingDidBegin(index);
     }
 
-    private static native void editBoxEditingChanged(int index, String text);
-    public static void __editBoxEditingChanged(int index, String text){
-        editBoxEditingChanged(index, text);
+    private static native void editBoxEditingChanged(int index, String text, int height);
+    public static void __editBoxEditingChanged(int index, String text, int height){
+        editBoxEditingChanged(index, text, height);
     }
 
     private static native void editBoxEditingDidEnd(int index, String text);
@@ -112,7 +112,8 @@ public class Cocos2dxEditBoxHelper {
                 int paddingLeft = (int)(5 * scaleX / density);
                 paddingLeft = convertToSP(paddingLeft);
 
-                editBox.setPadding(paddingLeft,paddingTop, 0, paddingBottom);
+                //editBox.setPadding(paddingLeft,paddingTop, 0, paddingBottom);
+                editBox.setPadding(paddingLeft,0, 0, 0);
 
 
                 FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams(
@@ -140,10 +141,20 @@ public class Cocos2dxEditBoxHelper {
                         // Note that we must to copy a string to prevent string content is modified
                         // on UI thread while 's.toString' is invoked at the same time.
                         final String text = new String(s.toString());
+
+                        final int height;
+                        if((editBox.getInputType() & InputType.TYPE_TEXT_FLAG_MULTI_LINE) == InputType.TYPE_TEXT_FLAG_MULTI_LINE) {
+                            int lineCount = editBox.getLineCount();
+                            height = lineCount > 1 || before > count ? lineCount * editBox.getLineHeight() : 0;
+                        }
+                        else {
+                            height = 0;
+                        }
+
                         mCocos2dxActivity.runOnGLThread(new Runnable() {
                             @Override
                             public void run() {
-                                Cocos2dxEditBoxHelper.__editBoxEditingChanged(index, text);
+                                Cocos2dxEditBoxHelper.__editBoxEditingChanged(index, text, height);
                             }
                         });
                     }
@@ -167,7 +178,7 @@ public class Cocos2dxEditBoxHelper {
                                 }
                             });
                             editBox.setSelection(editBox.getText().length());
-                            mFrameLayout.setEnableForceDoLayout(true);
+                            //mFrameLayout.setEnableForceDoLayout(true);
                             mCocos2dxActivity.getGLSurfaceView().setSoftKeyboardShown(true);
                             Log.d(TAG, "edit box get focus");
                         } else {
@@ -182,7 +193,7 @@ public class Cocos2dxEditBoxHelper {
                                 }
                             });
                             mCocos2dxActivity.hideVirtualButton();
-                            mFrameLayout.setEnableForceDoLayout(false);
+                            //mFrameLayout.setEnableForceDoLayout(false);
                             Log.d(TAG, "edit box lose focus");
                         }
                     }

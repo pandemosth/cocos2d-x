@@ -71,8 +71,11 @@ public:
     virtual void nativeOpenKeyboard() override;
     virtual void nativeCloseKeyboard() override;
     virtual void setNativeMaxLength(int maxLength) override;
+
+    virtual void updateHeight(int height);
     
 private:
+    EditBox* _editBox;
     int _editBoxIndex;
 };
 

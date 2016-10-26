@@ -46,16 +46,16 @@ namespace ui {
 
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_ERROR,"",__VA_ARGS__)
 static void editBoxEditingDidBegin(int index);
-static void editBoxEditingDidChanged(int index, const std::string& text);
+static void editBoxEditingDidChanged(int index, const std::string& text, int height);
 static void editBoxEditingDidEnd(int index, const std::string& text);
 extern "C"{
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxEditBoxHelper_editBoxEditingDidBegin(JNIEnv *env, jclass, jint index) {
         editBoxEditingDidBegin(index);
     }
 
-    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxEditBoxHelper_editBoxEditingChanged(JNIEnv *env, jclass, jint index, jstring text) {
+    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxEditBoxHelper_editBoxEditingChanged(JNIEnv *env, jclass, jint index, jstring text, jint height) {
         std::string textString = StringUtils::getStringUTFCharsJNI(env,text);
-        editBoxEditingDidChanged(index, textString);
+        editBoxEditingDidChanged(index, textString, height);
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxEditBoxHelper_editBoxEditingDidEnd(JNIEnv *env, jclass, jint index, jstring text) {
@@ -77,6 +77,7 @@ EditBoxImplAndroid::EditBoxImplAndroid(EditBox* pEditText)
 : EditBoxImplCommon(pEditText)
 , _editBoxIndex(-1)
 {
+    _editBox = pEditText;
 }
 
 EditBoxImplAndroid::~EditBoxImplAndroid()
@@ -85,6 +86,8 @@ EditBoxImplAndroid::~EditBoxImplAndroid()
     JniHelper::callStaticVoidMethod(editBoxClassName, "removeEditBox", _editBoxIndex);
 
 }
+
+
 
 void EditBoxImplAndroid::createNativeControl(const Rect& frame)
 {
@@ -102,7 +105,8 @@ void EditBoxImplAndroid::createNativeControl(const Rect& frame)
     auto uiTop = frameSize.height /2 - (rightTop.y - winSize.height / 2) * glView->getScaleY();
     auto uiWidth = (rightTop.x - leftBottom.x) * glView->getScaleX();
     auto uiHeight = (rightTop.y - leftBottom.y) * glView->getScaleY();
-    LOGD("scaleX = %f", glView->getScaleX());
+    LOGD("scaleX,Y = %f , %f", glView->getScaleX(), glView->getScaleY());
+    LOGD("uiTop = %f", uiTop);
     _editBoxIndex = JniHelper::callStaticIntMethod(editBoxClassName, "createEditBox",
                                                    (int)uiLeft, (int)uiTop, (int)uiWidth, (int)uiHeight, 
                                                    (float)glView->getScaleX());
@@ -195,6 +199,16 @@ void EditBoxImplAndroid::updateNativeFrame(const Rect& rect)
                                     (int)rect.size.width, (int)rect.size.height);
 }
 
+void EditBoxImplAndroid::updateHeight(int height)
+{
+    auto director = cocos2d::Director::getInstance();
+    auto glView = director->getOpenGLView();
+
+    Size size = _editBox->getContentSize();
+    size.height = height / glView->getScaleY();
+    _editBox->setContentSize(size);
+}
+
 void EditBoxImplAndroid::nativeOpenKeyboard()
 {
     JniHelper::callStaticVoidMethod(editBoxClassName, "openKeyboard", _editBoxIndex);
@@ -214,12 +228,16 @@ void editBoxEditingDidBegin(int index)
         s_allEditBoxes[index]->editBoxEditingDidBegin();
     }
 }
-void editBoxEditingDidChanged(int index, const std::string& text)
+void editBoxEditingDidChanged(int index, const std::string& text, int height)
 {
     auto it = s_allEditBoxes.find(index);
     if (it != s_allEditBoxes.end())
     {
-        s_allEditBoxes[index]->editBoxEditingChanged(text);
+        EditBoxImplAndroid* editBox = s_allEditBoxes[index];
+        if(height > 0) {
+            editBox->updateHeight(height);
+        }
+        editBox->editBoxEditingChanged(text);
     }
 }
 
