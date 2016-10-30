@@ -286,17 +286,21 @@
 
 - (void)updateFrame:(CGRect)rect
 {
-    if(!self.textInput.superview) {
-        auto view = cocos2d::Director::getInstance()->getOpenGLView();
-        CCEAGLView *eaglview = (CCEAGLView *)view->getEAGLView();
-        [eaglview addSubview:_textInput];
-    }
-    
     CGRect frame = self.textInput.frame;
     frame.origin = rect.origin;
     frame.size = rect.size;
     self.frameRect = frame;
     self.textInput.frame = frame;
+    
+    if(!self.textInput.superview) {
+        auto view = cocos2d::Director::getInstance()->getOpenGLView();
+        CCEAGLView *eaglview = (CCEAGLView *)view->getEAGLView();
+        [eaglview addSubview:_textInput];
+        
+        if ([self.textInput isKindOfClass:[CCUIMultilineTextField class]]) {
+            [self updateSize:self.textInput];
+        }
+    }
 }
 
 - (void)openKeyboard
@@ -384,8 +388,24 @@
 
 - (void)textViewDidChange:(UITextView *)textView
 {
-    int maxLength = getEditBoxImplIOS()->getMaxLength();    
+    if ([self.textInput isKindOfClass:[CCUIMultilineTextField class]]) {
+        [self updateSize:textView];
+    }
+    
+    int maxLength = getEditBoxImplIOS()->getMaxLength();
+    
+    if (textView.markedTextRange == nil) {
+        if (textView.text.length > maxLength) {
+            textView.text = [textView.text substringToIndex:maxLength];
+        }
+        
+        const char* inputText = [textView.text UTF8String];
+        getEditBoxImplIOS()->editBoxEditingChanged(inputText);
+    }
+}
 
+-(void)updateSize:(UIView *)textView
+{
     CGFloat fixedWidth = textView.frame.size.width;
     CGFloat currentHeight = textView.frame.size.height;
     CGSize newSize = [textView sizeThatFits:CGSizeMake(fixedWidth, MAXFLOAT)];
@@ -404,15 +424,7 @@
         CGFloat scaleFactor = glview->getScaleX() / glview->getContentScaleFactor();
         getEditBoxImplIOS()->updateSize(cocos2d::Size(fixedWidth / scaleFactor, newSize.height / scaleFactor));
     }
-    
-    if (textView.markedTextRange == nil) {
-        if (textView.text.length > maxLength) {
-            textView.text = [textView.text substringToIndex:maxLength];
-        }
-        
-        const char* inputText = [textView.text UTF8String];
-        getEditBoxImplIOS()->editBoxEditingChanged(inputText);
-    }
+
 }
 
 
