@@ -143,11 +143,10 @@ public class Cocos2dxEditBoxHelper {
                         final String text = new String(s.toString());
 
                         final int height;
-                        if((editBox.getInputType() & InputType.TYPE_TEXT_FLAG_MULTI_LINE) == InputType.TYPE_TEXT_FLAG_MULTI_LINE) {
+                        if ((editBox.getInputType() & InputType.TYPE_TEXT_FLAG_MULTI_LINE) == InputType.TYPE_TEXT_FLAG_MULTI_LINE) {
                             int lineCount = editBox.getLineCount();
-                            height = lineCount > 1 || before > count ? lineCount * editBox.getLineHeight() : 0;
-                        }
-                        else {
+                            height = lineCount > 0 || before > count ? Math.max(lineCount * editBox.getLineHeight(), 80)   : 0;
+                        } else {
                             height = 0;
                         }
 
@@ -178,7 +177,7 @@ public class Cocos2dxEditBoxHelper {
                                 }
                             });
                             editBox.setSelection(editBox.getText().length());
-                            //mFrameLayout.setEnableForceDoLayout(true);
+                            mFrameLayout.setEnableForceDoLayout(true);
                             mCocos2dxActivity.getGLSurfaceView().setSoftKeyboardShown(true);
                             Log.d(TAG, "edit box get focus");
                         } else {
@@ -193,13 +192,15 @@ public class Cocos2dxEditBoxHelper {
                                 }
                             });
                             mCocos2dxActivity.hideVirtualButton();
-                            //mFrameLayout.setEnableForceDoLayout(false);
+                            mFrameLayout.setEnableForceDoLayout(false);
                             Log.d(TAG, "edit box lose focus");
                         }
                     }
                 });
 
-                editBox.setOnKeyListener(new View.OnKeyListener() {
+                editBox.setOnKeyListener(new View.OnKeyListener()
+
+                {
                     public boolean onKey(View v, int keyCode, KeyEvent event) {
                         // If the event is a key-down event on the "enter" button
                         if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
