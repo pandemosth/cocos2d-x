@@ -44,6 +44,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.sdkbox.plugin.SDKBox;
+
 import org.cocos2dx.lib.Cocos2dxHelper.Cocos2dxHelperListener;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -263,6 +265,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
         onLoadNativeLibraries();
 
+        SDKBox.init(this);
+
         sContext = this;
         this.mHandler = new Cocos2dxHandler(this);
         
@@ -301,9 +305,22 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     // ===========================================================
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        SDKBox.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SDKBox.onStop();
+    }
+
+    @Override
     protected void onResume() {
     	Log.d(TAG, "onResume()");
         super.onResume();
+        SDKBox.onResume();
         this.hideVirtualButton();
        	resumeIfHasFocus();
     }
@@ -329,10 +346,18 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     protected void onPause() {
     	Log.d(TAG, "onPause()");
         super.onPause();
+        SDKBox.onPause();
         Cocos2dxHelper.onPause();
         mGLSurfaceView.onPause();
     }
-    
+
+    @Override
+    public void onBackPressed() {
+        if(!SDKBox.onBackPressed()) {
+            super.onBackPressed();
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -358,7 +383,9 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
             listener.onActivityResult(requestCode, resultCode, data);
         }
 
-        super.onActivityResult(requestCode, resultCode, data);
+        if(!SDKBox.onActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
 
