@@ -520,10 +520,7 @@ void ScriptingCore::string_report(JS::HandleValue val) {
 bool ScriptingCore::evalString(const char *string, JS::MutableHandleValue outVal, const char *filename, JSContext* cx, JS::HandleObject global)
 {
     JSAutoCompartment ac(cx, global);
-    JS::PersistentRootedScript script(cx);
-    if (script == nullptr) {
-        return false;
-    }
+    JS::RootedScript script(cx);
     
     JS::CompileOptions op(cx);
     op.setUTF8(true);
@@ -887,7 +884,9 @@ void ScriptingCore::restartVM()
 
 ScriptingCore::~ScriptingCore()
 {
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_IOS)
     cleanup();
+#endif
     JS_ShutDown();
 }
 
@@ -2427,6 +2426,7 @@ void jsb_ref_rebind(JSContext* cx, JS::HandleObject jsobj, js_proxy_t *proxy, co
     // and the jsobj won't have any chance to release it in the future
     oldRef->release();
 #else
+    newRef->autorelease();
     JS::RemoveObjectRoot(cx, &proxy->obj);
 #endif
     jsb_remove_proxy(proxy);
