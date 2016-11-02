@@ -26,6 +26,7 @@ THE SOFTWARE.
 #define __UIWIDGET_H__
 
 #include "2d/CCProtectedNode.h"
+#include "2d/CCActionTween.h"
 #include "ui/UILayoutParameter.h"
 #include "ui/GUIDefine.h"
 #include "ui/GUIExport.h"
@@ -75,7 +76,7 @@ typedef void (Ref::*SEL_TouchEvent)(Ref*,TouchEventType);
  * This class inherent from `ProtectedNode` and `LayoutParameterProtocol`.
  * If you want to implements your own ui widget, you should subclass it.
  */
-class CC_GUI_DLL Widget : public ProtectedNode, public LayoutParameterProtocol
+class CC_GUI_DLL Widget : public ProtectedNode, public LayoutParameterProtocol, public ActionTweenDelegate
 {
 public:
     /**
@@ -689,6 +690,8 @@ public:
      *@return Action tag.
      */
     int getActionTag()const;
+    
+    void updateTweenAction(float value, const std::string& key);
     
     /**
      * @brief Allow widget touch events to propagate to its parents. Set false will disable propagation

@@ -1363,6 +1363,18 @@ void Widget::copyProperties(Widget *widget)
 
 
 /*temp action*/
+    
+void Widget::updateTweenAction(float value, const std::string& key)
+{
+    CCASSERT(key == "height", "can only tween height");
+    Size size = this->getContentSize();
+    size.height = value;
+    this->setContentSize(size);
+    
+    auto component = this->getOrCreateLayoutComponent();
+    component->refreshLayout();
+}
+    
 void Widget::setActionTag(int tag)
 {
 	_actionTag = tag;
