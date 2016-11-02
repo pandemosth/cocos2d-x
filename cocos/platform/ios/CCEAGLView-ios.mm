@@ -396,6 +396,9 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 #pragma mark CCEAGLView - Touch Delegate
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    auto glview = cocos2d::Director::getInstance()->getOpenGLView();
+    CGRect frame = self.frame;
+    
     if (isKeyboardShown_)
     {
         [self handleTouchesAfterKeyboardShow];
@@ -410,10 +413,15 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
         ids[i] = touch;
         xs[i] = [touch locationInView: [touch view]].x * self.contentScaleFactor;;
         ys[i] = [touch locationInView: [touch view]].y * self.contentScaleFactor;;
+        
+        if(isKeyboardShown_) {
+            xs[i] -= frame.origin.x * self.contentScaleFactor;;
+            ys[i] -= frame.origin.y * self.contentScaleFactor;;
+        }
+        
         ++i;
     }
-
-    auto glview = cocos2d::Director::getInstance()->getOpenGLView();
+    
     glview->handleTouchesBegin(i, (intptr_t*)ids, xs, ys);
 }
 
@@ -877,6 +885,7 @@ UIInterfaceOrientation getFixedOrientation(UIInterfaceOrientation statusBarOrien
     [UIView beginAnimations:nil context:nullptr];
     [UIView setAnimationDelegate:self];
     [UIView setAnimationDuration:duration];
+    [UIView setAnimationCurve:UIViewAnimationCurve(7)];
     [UIView setAnimationBeginsFromCurrentState:YES];
     
     //NSLog(@"[animation] dis = %f, scale = %f \n", dis, cocos2d::GLView::getInstance()->getScaleY());

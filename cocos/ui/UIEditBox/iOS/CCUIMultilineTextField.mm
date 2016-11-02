@@ -76,7 +76,7 @@ CGFloat const UI_PLACEHOLDER_TEXT_CHANGED_ANIMATION_DURATION = 0.25;
 - (void)setPlaceholder:(NSString *)placeholder
 {
     //self.placeHolderLabel.font = self.font;
-    self.placeHolderLabel.text = @"placeholder";
+    self.placeHolderLabel.text = placeholder;
     [self.placeHolderLabel sizeToFit];
 }
 

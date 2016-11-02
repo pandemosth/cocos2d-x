@@ -254,6 +254,9 @@
 - (void)setText:(NSString *)text
 {
     self.textInput.ccui_text = text;
+    if ([self.textInput isKindOfClass:[CCUIMultilineTextField class]]) {
+        [self updateSize:self.textInput];
+    }
 }
 
 - (NSString *)text
@@ -288,8 +291,9 @@
 {
     CGRect frame = self.textInput.frame;
     frame.origin = rect.origin;
-    frame.size = rect.size;
-    self.frameRect = frame;
+    if(frame.size.height < self.frameRect.size.height) {
+        frame.origin.y += self.frameRect.size.height - frame.size.height;
+    }
     self.textInput.frame = frame;
     
     if(!self.textInput.superview) {
@@ -303,19 +307,34 @@
     }
 }
 
+-(void)updateSize:(UIView *)textView
+{
+    CGFloat fixedWidth = textView.frame.size.width;
+    CGFloat currentHeight = textView.frame.size.height;
+    CGSize newSize = [textView sizeThatFits:CGSizeMake(fixedWidth, MAXFLOAT)];
+    
+    if(newSize.height != currentHeight) {
+        
+        CGRect newFrame = textView.frame;
+        newFrame.size = CGSizeMake(fixedWidth, newSize.height);
+
+        textView.frame = newFrame;
+        
+        // update editbox size
+        auto glview = cocos2d::Director::getInstance()->getOpenGLView();
+        CGFloat scaleFactor = glview->getScaleX() / glview->getContentScaleFactor();
+        getEditBoxImplIOS()->updateSize(cocos2d::Size(fixedWidth / scaleFactor, fmax(newSize.height, self.frameRect.size.height) / scaleFactor));
+    }
+}
+
 - (void)openKeyboard
 {
-    auto view = cocos2d::Director::getInstance()->getOpenGLView();
-    CCEAGLView *eaglview = (CCEAGLView *)view->getEAGLView();
-    
-    //[eaglview addSubview:self.textInput];
     [self.textInput becomeFirstResponder];
 }
 
 - (void)closeKeyboard
 {
     [self.textInput resignFirstResponder];
-    //[self.textInput removeFromSuperview];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)sender
@@ -403,30 +422,6 @@
         getEditBoxImplIOS()->editBoxEditingChanged(inputText);
     }
 }
-
--(void)updateSize:(UIView *)textView
-{
-    CGFloat fixedWidth = textView.frame.size.width;
-    CGFloat currentHeight = textView.frame.size.height;
-    CGSize newSize = [textView sizeThatFits:CGSizeMake(fixedWidth, MAXFLOAT)];
-    
-    if(newSize.height != currentHeight) {
-        
-        CGRect newFrame = textView.frame;
-        newFrame.size = CGSizeMake(fixedWidth, newSize.height);
-        
-        CGFloat yPos = self.frameRect.origin.y + self.frameRect.size.height - newFrame.size.height;
-        newFrame.origin = CGPointMake(textView.frame.origin.x, yPos);
-        textView.frame = newFrame;
-        
-        // update editbox size
-        auto glview = cocos2d::Director::getInstance()->getOpenGLView();
-        CGFloat scaleFactor = glview->getScaleX() / glview->getContentScaleFactor();
-        getEditBoxImplIOS()->updateSize(cocos2d::Size(fixedWidth / scaleFactor, newSize.height / scaleFactor));
-    }
-
-}
-
 
 #pragma mark - UITextField delegate methods
 /**
