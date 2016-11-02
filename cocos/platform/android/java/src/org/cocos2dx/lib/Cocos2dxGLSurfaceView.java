@@ -202,11 +202,17 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
         final float[] ys = new float[pointerNumber];
 
         if (mSoftKeyboardShown){
-            InputMethodManager imm = (InputMethodManager)this.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            View view = ((Activity)this.getContext()).getCurrentFocus();
-            imm.hideSoftInputFromWindow(view.getWindowToken(),0);
-            this.requestFocus();
-            mSoftKeyboardShown = false;
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    InputMethodManager imm = (InputMethodManager)Cocos2dxGLSurfaceView.this.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    View view = ((Activity)Cocos2dxGLSurfaceView.this.getContext()).getCurrentFocus();
+                    imm.hideSoftInputFromWindow(view.getWindowToken(),0);
+                    Cocos2dxGLSurfaceView.this.requestFocus();
+                    mSoftKeyboardShown = false;
+                }
+            }, 50);
         }
 
         for (int i = 0; i < pointerNumber; i++) {
