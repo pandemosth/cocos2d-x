@@ -149,7 +149,9 @@ void EditBoxImplIOS::createNativeControl(const Rect& frame)
 
     Rect rect(0, 0, frame.size.width * glview->getScaleX(), frame.size.height * glview->getScaleY());
 
-    float factor = cocos2d::Director::getInstance()->getContentScaleFactor();
+    //float factor = cocos2d::Director::g etInstance()->getContentScaleFactor();
+    CCEAGLView *eaglview = static_cast<CCEAGLView *>(cocos2d::Director::getInstance()->getOpenGLView()->getEAGLView());
+    float factor = eaglview.contentScaleFactor;
 
     rect.size.width /= factor;
     rect.size.height /= factor;
