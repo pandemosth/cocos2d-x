@@ -201,24 +201,21 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
         final float[] xs = new float[pointerNumber];
         final float[] ys = new float[pointerNumber];
 
-        if (mSoftKeyboardShown){
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    InputMethodManager imm = (InputMethodManager)Cocos2dxGLSurfaceView.this.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    View view = ((Activity)Cocos2dxGLSurfaceView.this.getContext()).getCurrentFocus();
-                    imm.hideSoftInputFromWindow(view.getWindowToken(),0);
-                    Cocos2dxGLSurfaceView.this.requestFocus();
-                    mSoftKeyboardShown = false;
-                }
-            }, 50);
-        }
-
         for (int i = 0; i < pointerNumber; i++) {
             ids[i] = pMotionEvent.getPointerId(i);
             xs[i] = pMotionEvent.getX(i);
             ys[i] = pMotionEvent.getY(i);
+        }
+
+        if (mSoftKeyboardShown){
+            View view = ((Activity)Cocos2dxGLSurfaceView.this.getContext()).getCurrentFocus();
+            // allow a buffer zone above the keyboard for buttons that wont dismiss the keyboard
+            if(ys[0] < (view.getY() - view.getHeight())) {
+                InputMethodManager imm = (InputMethodManager) Cocos2dxGLSurfaceView.this.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                Cocos2dxGLSurfaceView.this.requestFocus();
+                mSoftKeyboardShown = false;
+            }
         }
 
         switch (pMotionEvent.getAction() & MotionEvent.ACTION_MASK) {

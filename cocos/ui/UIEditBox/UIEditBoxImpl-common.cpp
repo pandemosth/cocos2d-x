@@ -202,12 +202,12 @@ void EditBoxImplCommon::setReturnType(EditBox::KeyboardReturnType returnType)
 void EditBoxImplCommon::refreshInactiveText()
 {
     setInactiveText(_text.c_str());
-    if(_text.size() == 0)
+    if(_label->isVisible() && _text.size() == 0)
     {
         _label->setVisible(false);
         _labelPlaceHolder->setVisible(true);
     }
-    else
+    else if(_labelPlaceHolder->isVisible())
     {
         _label->setVisible(true);
         _labelPlaceHolder->setVisible(false);
@@ -289,6 +289,8 @@ void EditBoxImplCommon::closeKeyboard()
 
 void EditBoxImplCommon::onEndEditing(const std::string& text)
 {
+    _label->setVisible(true);
+    _labelPlaceHolder->setVisible(true);
     this->setNativeVisible(false);
     
     refreshInactiveText();

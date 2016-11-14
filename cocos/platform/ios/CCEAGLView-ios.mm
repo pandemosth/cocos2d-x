@@ -399,11 +399,6 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
     auto glview = cocos2d::Director::getInstance()->getOpenGLView();
     CGRect frame = self.frame;
     
-    if (isKeyboardShown_)
-    {
-        [self handleTouchesAfterKeyboardShow];
-    }
-    
     UITouch* ids[IOS_MAX_TOUCHES_COUNT] = {0};
     float xs[IOS_MAX_TOUCHES_COUNT] = {0.0f};
     float ys[IOS_MAX_TOUCHES_COUNT] = {0.0f};
@@ -414,11 +409,6 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
         xs[i] = [touch locationInView: [touch view]].x * self.contentScaleFactor;;
         ys[i] = [touch locationInView: [touch view]].y * self.contentScaleFactor;;
         
-        if(isKeyboardShown_) {
-            xs[i] -= frame.origin.x * self.contentScaleFactor;;
-            ys[i] -= frame.origin.y * self.contentScaleFactor;;
-        }
-        
         ++i;
     }
     
@@ -427,6 +417,11 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if (isKeyboardShown_)
+    {
+            [self handleTouchesAfterKeyboardShow];
+    }
+    
     UITouch* ids[IOS_MAX_TOUCHES_COUNT] = {0};
     float xs[IOS_MAX_TOUCHES_COUNT] = {0.0f};
     float ys[IOS_MAX_TOUCHES_COUNT] = {0.0f};
