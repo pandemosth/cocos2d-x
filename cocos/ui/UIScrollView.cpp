@@ -195,7 +195,8 @@ void ScrollView::setInnerContainerSize(const Size &size)
     }
     if (_innerContainer->getTopBoundary() != _contentSize.height)
     {
-        pos.y = _contentSize.height - (1.0f - _innerContainer->getAnchorPoint().y) * _innerContainer->getContentSize().height;
+//        pos.y = _contentSize.height - (1.0f - _innerContainer->getAnchorPoint().y) * _innerContainer->getContentSize().height;
+        pos.y += originalInnerSize.height - innerSizeHeight;
     }
     setInnerContainerPosition(pos);
     
